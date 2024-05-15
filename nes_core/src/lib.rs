@@ -1,6 +1,40 @@
-struct Emu {}
+/// An NES emulator.
+struct Emu {
+    /// A flag that denotes whether the last operation caused either an overflow or underflow.
+    carry: bool,
+    /// A flag that denotes whether to follow the rules of Binary Coded Decimal (BCD) arithmetic during addition and subtraction.
+    decimal_mode: bool,
+    /// A flag that denotes whether to ignore interrupts.
+    interrupt_disable: bool,
+}
 
 impl Emu {
+    /// Instantiates a new NES emulator.
+    fn new() -> Self {
+        Self {
+            carry: false,
+            decimal_mode: false,
+            interrupt_disable: true,
+        }
+    }
+
+    /// Parses and calls an instruction.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the instruction is not recognized.
+    fn execute(&mut self, opcode: u8) {
+        match opcode {
+            0x18 => self.clc(),
+            0xD8 => self.cld(),
+            0x58 => self.cli(),
+            0x38 => self.sec(),
+            0xF8 => self.sed(),
+            0x78 => self.sei(),
+            _ => unimplemented!(),
+        }
+    }
+
     // Instructions referenced from https://www.nesdev.org/obelisk-6502-guide/reference.html.
 
     /// ADC - Add with Carry.
@@ -70,17 +104,17 @@ impl Emu {
 
     /// CLC - Clear Carry Flag.
     fn clc(&mut self) {
-        unimplemented!();
+        self.carry = false;
     }
 
     /// CLD - Clear Decimal Mode.
     fn cld(&mut self) {
-        unimplemented!();
+        self.decimal_mode = false;
     }
 
     /// CLI - Clear Interrupt Disable.
     fn cli(&mut self) {
-        unimplemented!();
+        self.interrupt_disable = false;
     }
 
     /// CLV - Clear Overflow Flag.
@@ -225,17 +259,17 @@ impl Emu {
 
     /// SEC - Set Carry Flag.
     fn sec(&mut self) {
-        unimplemented!();
+        self.carry = true;
     }
 
     /// SED - Set Decimal Flag.
     fn sed(&mut self) {
-        unimplemented!();
+        self.decimal_mode = true;
     }
 
     /// SEI - Set Interrupt Disable.
     fn sei(&mut self) {
-        unimplemented!();
+        self.interrupt_disable = true;
     }
 
     /// STA - Store Accumulator.
