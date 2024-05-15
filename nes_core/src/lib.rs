@@ -1,11 +1,15 @@
 /// An NES emulator.
 struct Emu {
-    /// A flag that denotes whether the last operation caused either an overflow or underflow.
+    /// A flag that denotes whether the last operation caused unsigned overflow or underflow.
+    /// I.e. This flag is set to true if the last operation caused a carry out from bit 7 of the result or a carry in to bit 0.
     carry: bool,
     /// A flag that denotes whether to follow the rules of Binary Coded Decimal (BCD) arithmetic during addition and subtraction.
     decimal_mode: bool,
     /// A flag that denotes whether to ignore interrupts.
     interrupt_disable: bool,
+    /// A flag that denotes whether the last arithmetic operation caused signed overflow.
+    /// I.e. This flag is set to true if in the last operation two positive numbers summed to a negative number or if two negative numbers summed to a positive number.
+    overflow: bool,
 }
 
 impl Emu {
@@ -15,6 +19,7 @@ impl Emu {
             carry: false,
             decimal_mode: false,
             interrupt_disable: true,
+            overflow: false,
         }
     }
 
@@ -25,9 +30,11 @@ impl Emu {
     /// Panics if the instruction is not recognized.
     fn execute(&mut self, opcode: u8) {
         match opcode {
+            0xEA => return,
             0x18 => self.clc(),
             0xD8 => self.cld(),
             0x58 => self.cli(),
+            0xB8 => self.clv(),
             0x38 => self.sec(),
             0xF8 => self.sed(),
             0x78 => self.sei(),
@@ -119,7 +126,7 @@ impl Emu {
 
     /// CLV - Clear Overflow Flag.
     fn clv(&mut self) {
-        unimplemented!();
+        self.overflow = false;
     }
 
     /// CMP - Compare.
@@ -199,11 +206,6 @@ impl Emu {
 
     /// LSR - Logical Shift Right.
     fn lsr(&mut self) {
-        unimplemented!();
-    }
-
-    /// NOP - No Operation.
-    fn nop(&mut self) {
         unimplemented!();
     }
 
