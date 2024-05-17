@@ -1,5 +1,12 @@
 /// An NES emulator.
 struct Emu {
+    /// The accumulator register.  
+    a: u8,
+    /// Index Register X.
+    x: u8,
+    /// Index Register Y.
+    y: u8,
+
     /// A flag that denotes whether the last operation caused unsigned overflow or underflow.
     /// I.e. This flag is set to true if the last operation caused a carry out from bit 7 of the result or a carry in to bit 0.
     carry: bool,
@@ -7,19 +14,29 @@ struct Emu {
     decimal_mode: bool,
     /// A flag that denotes whether to ignore interrupts.
     interrupt_disable: bool,
+    // A flag that denotes whether the last operation had bit 7 set to a one.
+    negative: bool,
     /// A flag that denotes whether the last arithmetic operation caused signed overflow.
     /// I.e. This flag is set to true if in the last operation two positive numbers summed to a negative number or if two negative numbers summed to a positive number.
     overflow: bool,
+    /// A flag that denotes whether the last operation resulted in a zero.
+    zero: bool,
 }
 
 impl Emu {
     /// Instantiates a new NES emulator.
     fn new() -> Self {
         Self {
+            a: 0,
+            x: 0,
+            y: 0,
+
             carry: false,
             decimal_mode: false,
             interrupt_disable: true,
+            negative: false,
             overflow: false,
+            zero: false,
         }
     }
 
@@ -38,6 +55,10 @@ impl Emu {
             0x38 => self.sec(),
             0xF8 => self.sed(),
             0x78 => self.sei(),
+            0xAA => self.tax(),
+            0xA8 => self.tay(),
+            0x8A => self.txa(),
+            0x98 => self.tya(),
             _ => unimplemented!(),
         }
     }
@@ -291,12 +312,24 @@ impl Emu {
 
     /// TAX - Transfer Accumulator to X.
     fn tax(&mut self) {
-        unimplemented!();
+        self.x = self.a;
+
+        // Set zero flag if appropriate.
+        self.zero = self.x == 0;
+
+        // Set negative flag if appropriate.
+        self.negative = self.x >> 7 == 1;
     }
 
     /// TAY - Transfer Accumulator to Y.
     fn tay(&mut self) {
-        unimplemented!();
+        self.y = self.a;
+
+        // Set zero flag if appropriate.
+        self.zero = self.y == 0;
+
+        // Set negative flag if appropriate.
+        self.negative = self.y >> 7 == 1;
     }
 
     /// TSX - Transfer Stack Pointer to X.
@@ -306,7 +339,13 @@ impl Emu {
 
     /// TXA - Transfer X to Accumulator.
     fn txa(&mut self) {
-        unimplemented!();
+        self.a = self.x;
+
+        // Set zero flag if appropriate.
+        self.zero = self.a == 0;
+
+        // Set negative flag if appropriate.
+        self.negative = self.a >> 7 == 1;
     }
 
     /// TXS - Transfer X to Stack Pointer.
@@ -316,7 +355,13 @@ impl Emu {
 
     /// TYA - Transfer Y to Accumulator.
     fn tya(&mut self) {
-        unimplemented!();
+        self.a = self.y;
+
+        // Set zero flag if appropriate.
+        self.zero = self.a == 0;
+
+        // Set negative flag if appropriate.
+        self.negative = self.a >> 7 == 1;
     }
 }
 
